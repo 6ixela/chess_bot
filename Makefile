@@ -1,9 +1,18 @@
-main: gcc -Wextra -Wall -g src/game.c src/main.c src/move.c
+CC=gcc
+CFLAGS=-Wextra -Wall
+VPATH = src
+
+TARGET_EXE = main
+LDFLAGS= 
+OBJS = main.o
+
+all: $(TARGET_EXE)
+$(TARGET_EXE): $(OBJS)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $^
+
+debug: CFLAGS += -g -fsanitize=address
+debug: LDFLAGS += -fsanitize=address
+debug: $(TARGET_EXE)
 
 clean:
-	rm -rf *.o
-	rm -rf src/a.out
-	rm -rf src/main
-#rm main
-
-push: git add *; git commit -s -m "push"; git push
+	$(RM) $(OBJS) $(TARGET_EXE)
