@@ -1,9 +1,4 @@
-#include "game.h"
-#include "move.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
+/*
 char *recupPiece(struct piece *p);
 
 void printMove(struct piece *p)
@@ -62,12 +57,18 @@ char *recupPiece(struct piece *p)
 }
 
 //rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR
+*/
+
+#include "board.h"
+
+#include <stdio.h>
 
 int main()
 {
-    struct piece **b = FenToBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
-    
+    printf("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR\n");
+    struct board *b = fenToBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+    printf("%s\n", boardToFen(b));
     freeBoard(b);
-
+    printf("Hello\n");
     return 0;
 }
