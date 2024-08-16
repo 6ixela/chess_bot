@@ -4,7 +4,7 @@ VPATH = src
 
 TARGET_EXE = main
 LDFLAGS= 
-OBJS = main.o
+OBJS = main.o board.o piece.o
 
 all: $(TARGET_EXE)
 $(TARGET_EXE): $(OBJS)
