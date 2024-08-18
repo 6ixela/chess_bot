@@ -37,7 +37,7 @@ void determinePiece(char name, struct piece* piece)
         break;
     case 'q':
         piece->name = QUEEN;
-        piece->value = 100;
+        piece->value = 200;
         break;
     default:
         piece->name = KING;

@@ -1,34 +1,10 @@
 #include "minMax.h"
-#include "movePiece.h"
-#include "game.h"
+
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
-
-
-int evalBoard(struct piece **board)
-{
-    int res = 0;
-    for (size_t i = 0; i < 8; i++)
-    {
-        for (size_t j = 0; j < 8; j++)
-        {
-            struct piece *p = board[i * 8 + j];
-            
-            if (p == NULL)
-                continue;
-            //pos permet de savoir si piece blanche ou noir
-            short pos = p->isWhite ? 1 : -1;
-            
-           res += p->value * pos;
-        }
-        
-    }
-    
-    return res;
-}
 
 struct piece **deepCopy(struct piece **board)
 {

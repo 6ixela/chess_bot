@@ -13,7 +13,7 @@ enum NamePiece {
 struct piece
 {
     enum NamePiece name;
-    char color;
+    char color; // 0 is for white and 1 for black
     int value;
 };
 

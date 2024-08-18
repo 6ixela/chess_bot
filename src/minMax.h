@@ -1,6 +1,3 @@
-#include "game.h"
-#include "../test_function/testFunction.h"
-
 #ifndef MINMAX_H
 #define MINMAX_H
 
