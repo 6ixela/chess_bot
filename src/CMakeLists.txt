@@ -5,9 +5,11 @@ set(SOURCES
     main.c
     piece.c
     piece.h
-    bot.c
-    bot.h
     )
+
+add_subdirectory(bot)
+
+add_subdirectory(game)
 
 add_library(chessLib ${SOURCES})
 

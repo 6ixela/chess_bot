@@ -59,9 +59,10 @@ char *recupPiece(struct piece *p)
 //rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR
 */
 
+#include <stdio.h>
+
 #include "board.h"
 
-#include <stdio.h>
 
 int main()
 {

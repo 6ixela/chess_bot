@@ -1,7 +1,8 @@
 #ifndef PIECE_H
 #define PIECE_H
 
-enum NamePiece {
+enum NamePiece
+{
     KNIGHT,
     KING,
     QUEEN,
@@ -10,15 +11,20 @@ enum NamePiece {
     ROOK,
 };
 
-struct piece
+enum COLOR
 {
-    enum NamePiece name;
-    char color; // 0 is for white and 1 for black
-    int value;
+    BLACK,
+    WHITE,
 };
 
-struct piece* createPiece(char name);
-void freePiece(struct piece* piece);
+typedef struct
+{
+    enum NamePiece name;
+    enum COLOR color; // 0 is for white and 1 for black
+    int value;
+} piece;
 
+struct piece *createPiece(char name);
+void freePiece(struct piece *piece);
 
 #endif /* PIECE_H */
