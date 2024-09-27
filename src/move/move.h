@@ -1,10 +1,10 @@
 #ifndef MOVE_H
 #define MOVE_H
 
-#include "piece.h"
+#include "game.h"
 
 typedef unsigned int uint;
 
-void move(struct piece *piece, uint src, uint dst);
+// void move(Piece *piece, uint src, uint dst);
 
 #endif /* MOVE_H */

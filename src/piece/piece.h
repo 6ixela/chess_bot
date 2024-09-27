@@ -3,6 +3,7 @@
 
 enum NamePiece
 {
+    EMPTY,
     KNIGHT,
     KING,
     QUEEN,
@@ -20,11 +21,10 @@ enum COLOR
 typedef struct
 {
     enum NamePiece name;
-    enum COLOR color; // 0 is for white and 1 for black
+    enum COLOR color;
     int value;
-} piece;
+} Piece;
 
-struct piece *createPiece(char name);
-void freePiece(struct piece *piece);
+int setPiece(Piece *game, char);
 
 #endif /* PIECE_H */

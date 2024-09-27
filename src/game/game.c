@@ -2,21 +2,108 @@
 
 #include "game.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-Game *create_game_from_fen(char *fen)
+void initializeGame(Game *game)
 {
-    Game *game = malloc(sizeof(Game));
-    game->turn = 'w';
-    strcpy(game->castling, "");
-    strcpy(game->en_passant, "-");
+    for (int i = 0; i < BOARD_SIZE; i++)
+    {
+        for (int j = 0; j < BOARD_SIZE; j++)
+        {
+            game->board[i * 8 + j].name = EMPTY;
+            game->board[i * 8 + j].color = WHITE; // Valeur par défaut
+            game->board[i * 8 + j].color = 0;
+        }
+    }
+    game->turn = WHITE;
+    strcpy(game->castling, "KQkq");
+    game->en_passant[0] = '\0';
     game->halfmove_clock = 0;
-    game->fullmove_number = 0;
-    return game;
+    game->fullmove_number = 1;
 }
 
-void free_game(Game *game)
+void FEN_to_game(Game *game, const char *fen)
 {
-    free(game);
+    initializeGame(game);
+    int row = 0;
+    int col = 0;
+    const char *c = fen;
+    for (; *c != ' '; c++)
+    {
+        if (*c >= '1' && *c <= '8')
+        {
+            int emptySquares = *c - '0';
+            col += emptySquares;
+        }
+        else if (*c == '/')
+        {
+            row++;
+            col = 0;
+        }
+        else
+        {
+            setPiece(&(game->board[row * 8 + col]), *c);
+            col++;
+        }
+    }
+    while (*c && *c == ' ')
+        c++;
+    game->turn = (*(c++) == 'w') ? WHITE : BLACK;
+
+    while (*c && *c == ' ')
+        c++;
+    strncpy(game->castling, c, 4);
+    game->castling[4] = '\0';
+    c+=4;
+
+    while (*c && *c == ' ')
+        c++;
+    strncpy(game->en_passant, c, 2);
+    game->en_passant[2] = '\0';
+    c+=2;
+
+    while (*c && *c == ' ')
+        c++;
+    game->halfmove_clock = atoi(c);
+    
+    while (*c && *c != ' ')
+        c++;
+    game->fullmove_number = atoi(c);
+}
+
+void displayBoard(const Game *game)
+{
+    for (int i = 0; i < BOARD_SIZE; i++)
+    {
+        for (int j = 0; j < BOARD_SIZE; j++)
+        {
+            switch (game->board[i * 8 + j].name)
+            {
+            case EMPTY:
+                printf(". ");
+                break;
+            case PAWN:
+                printf("%c ", game->board[i * 8 + j].color == WHITE ? 'P' : 'p');
+                break;
+            case ROOK:
+                printf("%c ", game->board[i * 8 + j].color == WHITE ? 'R' : 'r');
+                break;
+            case KNIGHT:
+                printf("%c ", game->board[i * 8 + j].color == WHITE ? 'N' : 'n');
+                break;
+            case BISHOP:
+                printf("%c ", game->board[i * 8 + j].color == WHITE ? 'B' : 'b');
+                break;
+            case QUEEN:
+                printf("%c ", game->board[i * 8 + j].color == WHITE ? 'Q' : 'q');
+                break;
+            case KING:
+                printf("%c ", game->board[i * 8 + j].color == WHITE ? 'K' : 'k');
+                break;
+            }
+        }
+        printf("\n");
+    }
 }

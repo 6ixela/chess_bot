@@ -1,18 +1,20 @@
 # add_library(my_project_lib my_functions.c)
-set(SOURCES
-    board.c
-    board.h
-    main.c
-    piece.c
-    piece.h
-    )
+# set(SOURCES
+#     board.c
+#     board.h
+#     main.c
+#     piece.c
+#     piece.h
+#     )
 
-add_subdirectory(bot)
+cmake_minimum_required(VERSION 3.10)
 
 add_subdirectory(game)
+add_subdirectory(piece)
+add_subdirectory(bot)
+add_subdirectory(move)
 
-add_library(chessLib ${SOURCES})
+add_executable(${PROJECT_NAME} main.c)
 
-add_executable(chessBot ${SOURCES})
-
-target_link_libraries(chessBot chessLib)
+# Lier les bibliothèques
+target_link_libraries(${PROJECT_NAME} PRIVATE game piece bot move)

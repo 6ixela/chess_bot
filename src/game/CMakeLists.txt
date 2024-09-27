@@ -1,6 +1,8 @@
 set(SOURCES
     game.c
-    game.h
-    )
+    game.h)
 
-add_library(gameLib ${SOURCES})
+add_library(game ${SOURCES})
+
+target_include_directories(game PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../piece)
+target_include_directories(game INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

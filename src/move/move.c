@@ -26,9 +26,10 @@ int board120[120] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
 };
 
-void move(struct piece* piece, uint src, uint dst)
+
+void move(Game* game, uint src, uint dst)
 {
-    switch (piece->name)
+    switch (game->board[src])
     {
     case PAWN:
         break;
