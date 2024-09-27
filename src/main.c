@@ -65,7 +65,6 @@ char *recupPiece(struct piece *p)
 
 int main()
 {
-    printf("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR\n");
     Game game;
     FEN_to_game(&game, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     displayBoard(&game);
