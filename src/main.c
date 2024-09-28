@@ -62,15 +62,24 @@ char *recupPiece(struct piece *p)
 #include <stdio.h>
 
 #include "game.h"
+#include "move.h"
+#include "vector.h"
+
+static void swap(Game *game, int src, int dst)
+{
+    Piece piece = game->board[src];
+    Piece arrive = game->board[dst];
+    game->board[src] = arrive;
+    game->board[dst] = piece;
+}
 
 int main()
 {
     Game game;
-    FEN_to_game(&game, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    FEN_to_game(&game, "8/8/8/8/4k3/8/8/8 w KQkq - 0 1");
+    Vector *vector = kingMove(&game, 36);
+    print_vector(vector);
     displayBoard(&game);
-
     
-    FEN_to_game(&game, "8/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-    displayBoard(&game);
     return 0;
 }

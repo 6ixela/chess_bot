@@ -13,8 +13,9 @@ add_subdirectory(game)
 add_subdirectory(piece)
 add_subdirectory(bot)
 add_subdirectory(move)
+add_subdirectory(utils)
 
 add_executable(${PROJECT_NAME} main.c)
 
 # Lier les bibliothèques
-target_link_libraries(${PROJECT_NAME} PRIVATE game piece bot move)
+target_link_libraries(${PROJECT_NAME} PRIVATE game piece bot move utils)
