@@ -26,7 +26,7 @@ int board120[120] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 {
 }*/
 
-/*int isValidMove(Game *game, uint src, uint dst)
+/*int isValidMove(Game *game, u_int src, u_int dst)
 {
     Move move = { src, dst };
     switch (game->board[src].name)
@@ -46,23 +46,27 @@ int board120[120] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     }
 }*/
 
-Vector* pawnMove(Game *game, Move *move)
+static char isPushable(const int moveBoard120, Game *game, Piece *pieceFrom)
 {
-    int pawnPossibleMove[] = { 10, 20 };
-    Piece piece = game->board[move->from];
-    int sign = piece.color == WHITE ? 1 : -1;
-    Vector *vector = init_vector(8);
-    if (!vector)
+    if (moveBoard120 == -1)
     {
-        return NULL;
+        return 0;
     }
-    
-
-    return vector;
-
+    Piece pieceDst = game->board[moveBoard120];
+    if (pieceDst.name != EMPTY && pieceFrom->color == pieceDst.color)
+    {
+        return 0;
+    }
+    return 1;
 }
 
-Vector* kingMove(Game *game, uint src)
+Vector* pawnMove(Game *game, u_int src)
+{
+    Vector *vector = init_vector(8);
+    return vector;
+}
+
+Vector* kingMove(Game *game, u_int src)
 {
     const size_t LEN_POSSIBLE_MOVE_KING = 8;
     int kingPossibleMove[] = { 1, 9, 10, 11, -1, -9, -10, -11 };
@@ -75,43 +79,114 @@ Vector* kingMove(Game *game, uint src)
 
     for (size_t i = 0; i < LEN_POSSIBLE_MOVE_KING; i++)
     {
-        // check si le nouveau placement est ok
         const int moveBoard64 = board64[src] + kingPossibleMove[i];
         const int moveBoard120 = board120[moveBoard64];
-        if (moveBoard120 == -1)
+        if (isPushable(moveBoard120, game, &pieceFrom))
         {
-            continue;
-        }
-
-        // check si la place est vide ou piece enemie.
-        Piece pieceDst = game->board[moveBoard120];
-        if (pieceDst.name != EMPTY && pieceFrom.color == pieceDst.color)
-        {
-            continue;
-        }
-
-        // si ok push
-        push_back(vector, moveBoard120);
+            push_back(vector, moveBoard120);
+        }        
     }
     return vector;
 }
 
-Vector* rookove(Game *game, Move *move)
+Vector* rookMove(Game *game, u_int src)
 {
     int rookPossibleMove[] = { 1, 10, -1, -10 };
-    return 8;
+    Vector *vector = init_vector(8);
+    if (!vector)
+    {
+        return NULL;
+    }
+    Piece pieceFrom = game->board[src];
+
+    int i = 1;
+    u_char noMorePossibleMove = 0x0f;
+    while (noMorePossibleMove)
+    {
+        u_char tmp = 0x01;
+        for (size_t j = 0; j < 4; j++)
+        {
+            if (noMorePossibleMove & tmp)
+            {
+                const int moveBoard64 = board64[src] + (rookPossibleMove[j] * i);
+                const int moveBoard120 = board120[moveBoard64];
+                if (!isPushable(moveBoard120, game, &pieceFrom))
+                {
+                    noMorePossibleMove -= tmp;
+                }
+                else
+                {
+                    push_back(vector, moveBoard120);
+                }
+            }
+            tmp = tmp << 1;
+        }
+        i++;
+    }
+    return vector;
 }
-Vector* bishopMove(Game *game, Move *move)
+
+
+Vector* bishopMove(Game *game, u_int src)
 {
     int bishopPossibleMove[] = { 9, 11, -9, -11 };
-    return 8;
+    Vector *vector = init_vector(8);
+    if (!vector)
+    {
+        return NULL;
+    }
+    Piece pieceFrom = game->board[src];
+
+    int i = 1;
+    u_char noMorePossibleMove = 0x0f;
+    while (noMorePossibleMove)
+    {
+        u_char tmp = 0x01;
+        for (size_t j = 0; j < 4; j++)
+        {
+            if (noMorePossibleMove & tmp)
+            {
+                const int moveBoard64 = board64[src] + (bishopPossibleMove[j] * i);
+                const int moveBoard120 = board120[moveBoard64];
+                if (!isPushable(moveBoard120, game, &pieceFrom))
+                {
+                    noMorePossibleMove -= tmp;
+                }
+                else
+                {
+                    push_back(vector, moveBoard120);
+                }
+            }
+            tmp = tmp << 1;
+        }
+        i++;
+    }
+    return vector;
 }
-Vector* knightMove(Game *game, Move *move)
+Vector* knightMove(Game *game, u_int src)
 {
     int knightPossibleMove[] = { 12, 21, 19, 8, -12, -21, -19, -8 };
-    return 8;
+    const size_t LEN_POSSIBLE_MOVE_KNIGHT = 8;
+    Vector *vector = init_vector(8);
+    if (!vector)
+    {
+        return NULL;
+    }
+    Piece pieceFrom = game->board[src];
+
+    for (size_t i = 0; i < LEN_POSSIBLE_MOVE_KNIGHT; i++)
+    {
+        const int moveBoard64 = board64[src] + knightPossibleMove[i];
+        const int moveBoard120 = board120[moveBoard64];
+        if (isPushable(moveBoard120, game, &pieceFrom))
+        {
+            push_back(vector, moveBoard120);
+        }
+    }
+    return vector;
 }
-Vector* queenMove(Game *game, Move *move)
+Vector* queenMove(Game *game, u_int src)
 {
-    return bishopMove(game, move) || rookove(game, move);
+    Vector *vec = concat_vectors(bishopMove(game, src), rookMove(game, src));
+    return vec;
 }

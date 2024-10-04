@@ -5,9 +5,9 @@
 
 typedef struct
 {
-    int *data; // Tableau dynamique pour stocker les éléments
-    size_t size; // Nombre d'éléments actuellement stockés
-    size_t capacity; // Capacité totale du tableau
+    int *data;
+    size_t size;
+    size_t capacity;
 } Vector;
 
 Vector *init_vector(size_t initial_capacity);
@@ -17,5 +17,7 @@ void push_back(Vector *vec, int value);
 void free_vector(Vector *vec);
 
 void print_vector(Vector *vec);
+
+Vector *concat_vectors(Vector *vec1, Vector *vec2);
 
 #endif /* !VECTOR_H */

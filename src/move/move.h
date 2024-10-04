@@ -4,12 +4,13 @@
 #include "game.h"
 #include "vector.h"
 
-typedef unsigned int uint;
+typedef unsigned int u_int;
+typedef unsigned char uchar;
 
 typedef struct Move
 {
-    uint from;
-    uint to;
+    u_int from;
+    u_int to;
 } Move;
 
 typedef struct MoveList
@@ -21,13 +22,13 @@ typedef struct MoveList
 Move *getAllMove(Game *game);
 int isValidMove(Game *game, Move *move);
 
-Vector *pawnMove(Game *game, Move *move);
-Vector *kingMove(Game *game, uint src);
-Vector *queenMove(Game *game, Move *move);
-Vector *rookMove(Game *game, Move *move);
-Vector *bishopMove(Game *game, Move *move);
-Vector *knightMove(Game *game, Move *move);
+Vector *pawnMove(Game *game, u_int src);
+Vector *kingMove(Game *game, u_int src);
+Vector *queenMove(Game *game, u_int src);
+Vector *rookMove(Game *game, u_int move);
+Vector *bishopMove(Game *game, u_int src);
+Vector *knightMove(Game *game, u_int src);
 
-// void move(Piece *piece, uint src, uint dst);
+// void move(Piece *piece, u_int src, u_int dst);
 
 #endif /* MOVE_H */

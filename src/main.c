@@ -64,6 +64,7 @@ char *recupPiece(struct piece *p)
 #include "game.h"
 #include "move.h"
 #include "vector.h"
+#include "display.h"
 
 static void swap(Game *game, int src, int dst)
 {
@@ -76,10 +77,10 @@ static void swap(Game *game, int src, int dst)
 int main()
 {
     Game game;
-    FEN_to_game(&game, "8/8/8/8/4k3/8/8/8 w KQkq - 0 1");
-    Vector *vector = kingMove(&game, 36);
+    FEN_to_game(&game, "8/8/8/8/4q3/8/8/8 w KQkq - 0 1");
+    Vector *vector = queenMove(&game, 36);
     print_vector(vector);
-    displayBoard(&game);
-    
+    displayMove(&game, vector);
+    free_vector(vector);
     return 0;
 }
