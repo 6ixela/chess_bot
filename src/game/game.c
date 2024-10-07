@@ -72,38 +72,3 @@ void FEN_to_game(Game *game, const char *fen)
         c++;
     game->fullmove_number = atoi(c);
 }
-
-void displayBoard(const Game *game)
-{
-    for (int i = 0; i < BOARD_SIZE; i++)
-    {
-        for (int j = 0; j < BOARD_SIZE; j++)
-        {
-            switch (game->board[i * 8 + j].name)
-            {
-            case EMPTY:
-                printf(". ");
-                break;
-            case PAWN:
-                printf("%c ", game->board[i * 8 + j].color == WHITE ? 'P' : 'p');
-                break;
-            case ROOK:
-                printf("%c ", game->board[i * 8 + j].color == WHITE ? 'R' : 'r');
-                break;
-            case KNIGHT:
-                printf("%c ", game->board[i * 8 + j].color == WHITE ? 'N' : 'n');
-                break;
-            case BISHOP:
-                printf("%c ", game->board[i * 8 + j].color == WHITE ? 'B' : 'b');
-                break;
-            case QUEEN:
-                printf("%c ", game->board[i * 8 + j].color == WHITE ? 'Q' : 'q');
-                break;
-            case KING:
-                printf("%c ", game->board[i * 8 + j].color == WHITE ? 'K' : 'k');
-                break;
-            }
-        }
-        printf("\n");
-    }
-}

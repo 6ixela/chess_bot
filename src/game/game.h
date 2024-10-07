@@ -17,6 +17,5 @@ typedef struct
 
 
 void FEN_to_game(Game *game, const char *fen);
-void displayBoard(const Game *game);
 
 #endif /* !GAME_H */
