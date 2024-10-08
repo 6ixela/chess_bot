@@ -21,3 +21,4 @@ int evalBoard(Game *game)
     }
     return res;
 }
+

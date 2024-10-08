@@ -4,20 +4,23 @@
 #include "game.h"
 #include "vector.h"
 
-typedef unsigned int u_int;
-typedef unsigned char uchar;
+typedef enum {
+    MOVEMENT,
+    CAPTURE,
+    PROMOTION,
+    CASTLE,
+} MoveType;
 
 typedef struct Move
 {
+    MoveType moveType;
     u_int from;
     u_int to;
+    Piece piece_captured;
+
 } Move;
 
-typedef struct MoveList
-{
-    Move *move;
-    struct MoveList *next;
-} MoveList;
+void initMoveStruct(Move *move, u_int from, u_int to);
 
 Vector *getMoveFromPiece(Game *game, u_int src);
 Vector *pawnMove(Game *game, u_int src);

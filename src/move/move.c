@@ -22,6 +22,56 @@ int board120[120] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
                       -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
                       -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
 
+void initMoveStruct(Move *move, u_int from, u_int to)
+{
+    Piece piece = {EMPTY, BLACK, 0};
+    move->piece_captured = piece;
+    move->from = from;
+    move->to = to;
+}
+
+inline static void clearPiece(Piece* piece)
+{
+    piece->name = EMPTY;
+    piece->color = BLACK;
+    piece->value = 0;
+}
+
+void doMovement(Game *game, Move* move)
+{
+    Piece piece = game->board[move->from];
+    Piece arrive = game->board[move->to];
+
+    if (arrive.name != EMPTY && arrive.color != piece.color)
+    {
+        move->piece_captured = arrive;
+        clearPiece(&arrive);
+    }
+    
+    game->board[move->from] = arrive;
+    game->board[move->to] = piece;
+}
+
+void undoMovement(Game *game, Move* move)
+{
+    Piece piece = game->board[move->to];
+    
+    if (move->moveType == CAPTURE || move->moveType == MOVEMENT)
+    {
+        game->board[move->to] = move->piece_captured;
+    }
+    else if (move->moveType == CASTLE)
+    {
+        game->board[move->to] = game->board[move->from];
+    }
+    else
+    {
+        piece.name = PAWN;
+        piece.value = 10;
+    }
+    game->board[move->from] = piece;
+}
+
 
 Vector *getMoveFromPiece(Game *game, u_int src)
 {

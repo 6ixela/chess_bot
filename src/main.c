@@ -66,13 +66,7 @@ char *recupPiece(struct piece *p)
 #include "vector.h"
 #include "display.h"
 
-static void swap(Game *game, int src, int dst)
-{
-    Piece piece = game->board[src];
-    Piece arrive = game->board[dst];
-    game->board[src] = arrive;
-    game->board[dst] = piece;
-}
+
 
 int main()
 {
