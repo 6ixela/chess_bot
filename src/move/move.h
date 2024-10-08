@@ -22,9 +22,7 @@ typedef struct Move
 
 void initMoveStruct(Move *move, u_int from, u_int to);
 
-Move *getAllMove(Game *game);
-int isValidMove(Game *game, Move *move);
-
+Vector *getMoveFromPiece(Game *game, u_int src);
 Vector *pawnMove(Game *game, u_int src);
 Vector *kingMove(Game *game, u_int src);
 Vector *queenMove(Game *game, u_int src);
