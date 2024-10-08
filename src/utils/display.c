@@ -4,11 +4,14 @@
 
 static char inVector(Vector *vector, int value)
 {
-    for (size_t i = 0; i < vector->size; i++)
+    if (vector)
     {
-        if (vector->data[i] == value)
+        for (size_t i = 0; i < vector->size; i++)
         {
-            return 1;
+            if (vector->data[i] == value)
+            {
+                return 1;
+            }
         }
     }
     return 0;
@@ -67,7 +70,8 @@ void displayMove(const Game *game, Vector *vector, u_int src)
         }
         printf(RESET "\n"); // Réinitialiser la couleur à la fin de la ligne
     }
-    if (cpt != vector->size)
+    printf("\n");
+    if (vector && cpt != vector->size)
     {
         fprintf(stderr, "Error, too much move\n");
     }

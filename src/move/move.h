@@ -20,6 +20,10 @@ typedef struct Move
 
 } Move;
 
+void undoMovement(Game *game, Move* move);
+void doMovement(Game *game, Move* move);
+void createMove(Game *game, u_int src, u_int dst, Move *move);
+
 void initMoveStruct(Move *move, u_int from, u_int to);
 
 Vector *getMoveFromPiece(Game *game, u_int src);

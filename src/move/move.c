@@ -30,7 +30,7 @@ void initMoveStruct(Move *move, u_int from, u_int to)
     move->to = to;
 }
 
-inline static void clearPiece(Piece* piece)
+static void clearPiece(Piece* piece)
 {
     piece->name = EMPTY;
     piece->color = BLACK;
@@ -50,6 +50,25 @@ void doMovement(Game *game, Move* move)
     
     game->board[move->from] = arrive;
     game->board[move->to] = piece;
+}
+
+void createMove(Game *game, u_int src, u_int dst, Move *move)
+{
+    initMoveStruct(move, src, dst);
+    Piece pieceSrc = game->board[src];
+    Piece pieceDst = game->board[dst];
+    if (pieceDst.name == EMPTY)
+    {
+        move->moveType = MOVEMENT;
+    }
+    else if (pieceDst.name != EMPTY && pieceDst.color == pieceSrc.color)
+    {
+        move->moveType = CASTLE;
+    }
+    else if (pieceDst.name != EMPTY && pieceDst.color != pieceSrc.color)
+    {
+        move->moveType = CAPTURE;
+    }
 }
 
 void undoMovement(Game *game, Move* move)
@@ -89,10 +108,9 @@ Vector *getMoveFromPiece(Game *game, u_int src)
         return queenMove(game, src);
     case KNIGHT:
         return knightMove(game, src);
-    case EMPTY:
+    default:
         return NULL;
     }
-    return NULL;
 }
 
 static char isPushable(const int moveBoard120, Game *game, Piece *pieceFrom)
@@ -124,7 +142,7 @@ Vector* pawnMove(Game *game, u_int src)
     char moveBoard64 = board64[src] + (pawnPossibleMove[0] * color);
     char moveBoard120 = board120[moveBoard64];
 
-    if (isPushable(moveBoard120, game, &pieceFrom))
+    if (isPushable(moveBoard120, game, &pieceFrom) == 1)
     {
         push_back(vector, moveBoard120);
     }
@@ -135,7 +153,7 @@ Vector* pawnMove(Game *game, u_int src)
     {
         if (pawnPosition / 10 == 8)
         {
-            if (isPushable(moveBoard120, game, &pieceFrom))
+            if (isPushable(moveBoard120, game, &pieceFrom) == 1)
             {
                 push_back(vector, moveBoard120);
             }
@@ -146,7 +164,7 @@ Vector* pawnMove(Game *game, u_int src)
     {
         if (pawnPosition / 10 == 3)
         {
-            if (isPushable(moveBoard120, game, &pieceFrom))
+            if (isPushable(moveBoard120, game, &pieceFrom) == 1)
             {
                 push_back(vector, moveBoard120);
             }
@@ -159,6 +177,7 @@ Vector* pawnMove(Game *game, u_int src)
         const char moveBoard120 = board120[moveBoard64];
         if (isPushable(moveBoard120, game, &pieceFrom))
         {
+            // capturing
             if (game->board[moveBoard120].name != EMPTY && pieceFrom.color != game->board[moveBoard120].color)
             {
                 push_back(vector, moveBoard120);
