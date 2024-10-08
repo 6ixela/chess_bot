@@ -77,10 +77,10 @@ static void swap(Game *game, int src, int dst)
 int main()
 {
     Game game;
-    FEN_to_game(&game, "8/8/8/8/4q3/8/8/8 w KQkq - 0 1");
+    FEN_to_game(&game, "8/8/8/3PBP2/3RqQ2/3RQB2/8/8 w KQkq - 0 1");
     Vector *vector = queenMove(&game, 36);
     print_vector(vector);
-    displayMove(&game, vector);
+    displayMove(&game, vector, 36);
     free_vector(vector);
     return 0;
 }

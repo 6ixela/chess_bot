@@ -26,6 +26,7 @@ void initializeGame(Game *game)
 
 void FEN_to_game(Game *game, const char *fen)
 {
+    // TODO complete if uncomplete FEN
     initializeGame(game);
     int row = 0;
     int col = 0;

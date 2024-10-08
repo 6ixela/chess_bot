@@ -19,9 +19,7 @@ typedef struct MoveList
     struct MoveList *next;
 } MoveList;
 
-Move *getAllMove(Game *game);
-int isValidMove(Game *game, Move *move);
-
+Vector *getMoveFromPiece(Game *game, u_int src);
 Vector *pawnMove(Game *game, u_int src);
 Vector *kingMove(Game *game, u_int src);
 Vector *queenMove(Game *game, u_int src);

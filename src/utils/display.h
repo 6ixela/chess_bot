@@ -10,6 +10,6 @@
 #include "game.h"
 #include "vector.h"
 
-void displayMove(const Game *game, Vector *vector);
+void displayMove(const Game *game, Vector *vector, u_int src);
 
 #endif /* !DISPLAY_H */

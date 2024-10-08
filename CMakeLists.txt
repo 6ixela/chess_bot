@@ -4,6 +4,7 @@ project(chessBot)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -g -lcriterion")
 
+enable_testing()
+
 add_subdirectory(src)
 add_subdirectory(tests)
-
