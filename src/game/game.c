@@ -5,7 +5,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+/*
+ * Example FEN: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+ */
 void initializeGame(Game *game)
 {
     for (int i = 0; i < BOARD_SIZE; i++)
