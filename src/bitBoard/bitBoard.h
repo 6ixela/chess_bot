@@ -2,10 +2,10 @@
 #define BITBOARD_H
 
 #include <stdlib.h>
+#include <stdbool.h>
 
 typedef char err;
 typedef size_t U64;
-typedef char bool;
 typedef struct Board
 {
     U64 WPawn;

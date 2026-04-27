@@ -14,26 +14,26 @@ typedef enum {
 typedef struct Move
 {
     MoveType moveType;
-    u_int from;
-    u_int to;
+    unsigned int from;
+    unsigned int to;
     Piece piece_captured;
 
 } Move;
 
 void undoMovement(Game *game, Move* move);
 void doMovement(Game *game, Move* move);
-void createMove(Game *game, u_int src, u_int dst, Move *move);
+void createMove(Game *game, unsigned int src, unsigned int dst, Move *move);
 
-void initMoveStruct(Move *move, u_int from, u_int to);
+void initMoveStruct(Move *move, unsigned int from, unsigned int to);
 
-Vector *getMoveFromPiece(Game *game, u_int src);
-Vector *pawnMove(Game *game, u_int src);
-Vector *kingMove(Game *game, u_int src);
-Vector *queenMove(Game *game, u_int src);
-Vector *rookMove(Game *game, u_int move);
-Vector *bishopMove(Game *game, u_int src);
-Vector *knightMove(Game *game, u_int src);
+Vector *getMoveFromPiece(Game *game, unsigned int src);
+Vector *pawnMove(Game *game, unsigned int src);
+Vector *kingMove(Game *game, unsigned int src);
+Vector *queenMove(Game *game, unsigned int src);
+Vector *rookMove(Game *game, unsigned int move);
+Vector *bishopMove(Game *game, unsigned int src);
+Vector *knightMove(Game *game, unsigned int src);
 
-// void move(Piece *piece, u_int src, u_int dst);
+// void move(Piece *piece, unsigned int src, unsigned int dst);
 
 #endif /* MOVE_H */

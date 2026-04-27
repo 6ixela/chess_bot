@@ -17,30 +17,37 @@ static char inVector(Vector *vector, int value)
     return 0;
 }
 
-void displayMove(const Game *game, Vector *vector, u_int src)
+void displayMove(const Game *game, Vector *vector, unsigned int src)
 {
     size_t cpt = 0;
     for (int i = 0; i < BOARD_SIZE; i++)
     {
         for (int j = 0; j < BOARD_SIZE; j++)
         {
-            u_int index = i * BOARD_SIZE + j;
+            unsigned int index = i * BOARD_SIZE + j;
+
+            const char *fg_color = NULL;
+            const char *bg_color = RESET;
 
             if (inVector(vector, index))
             {
                 cpt++;
-                printf(RED);
+                bg_color = ANSI_BG_RED;
             }
-            else
+            else if (index == src)
             {
-                if (index == src)
-                {
-                    printf(GREEN);
-                }
-                else
-                {
-                    printf(RESET);
-                }
+                bg_color = ANSI_BG_GREEN;
+            }
+
+            if (game->board[index].name != EMPTY)
+            {
+                fg_color = game->board[index].color == WHITE ? ANSI_WHITE : ANSI_BLUE;
+            }
+
+            printf("%s", bg_color);
+            if (fg_color)
+            {
+                printf("%s", fg_color);
             }
 
             switch (game->board[index].name)
@@ -49,22 +56,22 @@ void displayMove(const Game *game, Vector *vector, u_int src)
                 printf(". ");
                 break;
             case PAWN:
-                printf("%c ", game->board[index].color == WHITE ? 'P' : 'p');
+                printf("%s ", game->board[index].color == WHITE ? "♙" : "♟");
                 break;
             case ROOK:
-                printf("%c ", game->board[index].color == WHITE ? 'R' : 'r');
+                printf("%s ", game->board[index].color == WHITE ? "♖" : "♜");
                 break;
             case KNIGHT:
-                printf("%c ", game->board[index].color == WHITE ? 'N' : 'n');
+                printf("%s ", game->board[index].color == WHITE ? "♘" : "♞");
                 break;
             case BISHOP:
-                printf("%c ", game->board[index].color == WHITE ? 'B' : 'b');
+                printf("%s ", game->board[index].color == WHITE ? "♗" : "♝");
                 break;
             case QUEEN:
-                printf("%c ", game->board[index].color == WHITE ? 'Q' : 'q');
+                printf("%s ", game->board[index].color == WHITE ? "♕" : "♛");
                 break;
             case KING:
-                printf("%c ", game->board[index].color == WHITE ? 'K' : 'k');
+                printf("%s ", game->board[index].color == WHITE ? "♔" : "♚");
                 break;
             }
         }

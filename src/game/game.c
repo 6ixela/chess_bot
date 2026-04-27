@@ -8,70 +8,92 @@
 /*
  * Example FEN: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
  */
-void initializeGame(Game *game)
+
+/*
+typedef struct
 {
-    for (int i = 0; i < BOARD_SIZE; i++)
-    {
-        for (int j = 0; j < BOARD_SIZE; j++)
-        {
-            game->board[i * 8 + j].name = EMPTY;
-            game->board[i * 8 + j].color = WHITE; // Valeur par défaut
-            game->board[i * 8 + j].color = 0;
-        }
-    }
-    game->turn = WHITE;
-    strcpy(game->castling, "KQkq");
-    game->en_passant[0] = '\0';
-    game->halfmove_clock = 0;
-    game->fullmove_number = 1;
-}
+    Piece board[BOARD_SIZE * BOARD_SIZE];
+    Board bitboard;
+    enum COLOR turn;
+    char castling[5];
+    char en_passant[3];
+    int halfmove_clock;
+    int fullmove_number;
+} Game;
+*/
 
 void FEN_to_game(Game *game, const char *fen)
 {
-    // TODO complete if uncomplete FEN
-    initializeGame(game);
-    int row = 0;
-    int col = 0;
-    const char *c = fen;
-    for (; *c != ' '; c++)
+    memset(game, 0, sizeof(Game));
+    int pos = 0; // position on board, 0 = a8, 63 = h1
+    int i = 0;
+    // Parse board
+    while (fen[i] != ' ')
     {
-        if (*c >= '1' && *c <= '8')
+        if (fen[i] == '/')
         {
-            int emptySquares = *c - '0';
-            col += emptySquares;
+            // Skip, ranks are handled by pos increment
         }
-        else if (*c == '/')
+        else if (fen[i] >= '1' && fen[i] <= '8')
         {
-            row++;
-            col = 0;
+            int empty = fen[i] - '0';
+            for (int k = 0; k < empty; k++)
+            {
+                game->board[pos].name = EMPTY;
+                pos++;
+            }
         }
         else
         {
-            setPiece(&(game->board[row * 8 + col]), *c);
-            col++;
+            setPiece(&game->board[pos], fen[i]);
+            pos++;
+        }
+        i++;
+    }
+    i++; // skip space
+    // Turn
+    game->turn = (fen[i] == 'w') ? WHITE : BLACK;
+    i += 2; // skip turn and space
+    // Castling
+    int j = 0;
+    while (fen[i] != ' ')
+    {
+        game->castling[j++] = fen[i++];
+    }
+    game->castling[j] = '\0';
+    i++; // skip space
+    // En passant
+    if (fen[i] == '-')
+    {
+        strcpy(game->en_passant, "-");
+        i++;
+    }
+    else
+    {
+        game->en_passant[0] = fen[i++];
+        game->en_passant[1] = fen[i++];
+        game->en_passant[2] = '\0';
+    }
+    i++; // skip space
+    // Halfmove clock
+    game->halfmove_clock = atoi(&fen[i]);
+    while (fen[i] != ' ') i++;
+    i++; // skip space
+    // Fullmove number
+    game->fullmove_number = atoi(&fen[i]);
+    // Now set bitboard
+    createBoard((char *)fen, &game->bitboard);
+}
+
+bool bothKingsAlive(const Game *game)
+{
+    int kingCount = 0;
+    for (size_t i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
+    {
+        if (game->board[i].name == KING)
+        {
+            kingCount++;
         }
     }
-    while (*c && *c == ' ')
-        c++;
-    game->turn = (*(c++) == 'w') ? WHITE : BLACK;
-
-    while (*c && *c == ' ')
-        c++;
-    strncpy(game->castling, c, 4);
-    game->castling[4] = '\0';
-    c+=4;
-
-    while (*c && *c == ' ')
-        c++;
-    strncpy(game->en_passant, c, 2);
-    game->en_passant[2] = '\0';
-    c+=2;
-
-    while (*c && *c == ' ')
-        c++;
-    game->halfmove_clock = atoi(c);
-    
-    while (*c && *c != ' ')
-        c++;
-    game->fullmove_number = atoi(c);
+    return kingCount == 2;
 }

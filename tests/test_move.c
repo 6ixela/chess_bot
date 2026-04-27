@@ -17,12 +17,12 @@ Test(test_start_game, test_move)
                          0, 0, 0, 0, 0, 0, 0, 0,
                          2, 2, 2, 2, 2, 2, 2, 2,
                          0, 2, 0, 0, 0, 0, 2, 0 };
-    for (u_int i = 0; i < 64; i++)
+    for (unsigned int i = 0; i < 64; i++)
     {
         Vector *vector = getMoveFromPiece(&game, i);
         if (vector)
         {
-            cr_assert_eq(valueMove[i], vector->size, "Expected %li\nBut got %li\nIndex: %i",
+            cr_assert_eq(valueMove[i], vector->size, "Expected %zu\nBut got %zu\nIndex: %u",
                          valueMove[i], vector->size, i);
         }
         free_vector(vector);

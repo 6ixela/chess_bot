@@ -12,7 +12,7 @@ add_executable(tests ${SOURCES_TESTS})
 
 target_include_directories(tests PRIVATE ${PROJECT_SOURCE_DIR}/src)
 
-target_link_libraries(tests game piece bot move utils)
+target_link_libraries(tests game piece bot move utils bitBoard)
 
 
 

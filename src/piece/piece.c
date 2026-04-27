@@ -40,7 +40,7 @@ static void determinePiece(Piece *piece, char namePiece)
         break;
     default:
         piece->name = KING;
-        piece->value = 10000;
+        piece->value = 1000;
         break;
     }
 }

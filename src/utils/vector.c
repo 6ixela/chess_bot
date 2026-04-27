@@ -20,7 +20,13 @@ Vector *init_vector(size_t initial_capacity)
         return NULL;
     }
 
-    vec->data = malloc(initial_capacity * sizeof(int));
+    vec->data = calloc(initial_capacity, sizeof(int));
+    if (!vec->data)
+    {
+        free(vec);
+        return NULL;
+    }
+
     vec->size = 0;
     vec->capacity = initial_capacity;
     return vec;
@@ -30,8 +36,14 @@ void push_back(Vector *vec, int value)
 {
     if (vec->size >= vec->capacity)
     {
-        vec->capacity *= 2;
-        vec->data = realloc(vec->data, vec->capacity * sizeof(int));
+        size_t new_capacity = vec->capacity ? vec->capacity * 2 : 1;
+        int *new_data = realloc(vec->data, new_capacity * sizeof(int));
+        if (!new_data)
+        {
+            return;
+        }
+        vec->data = new_data;
+        vec->capacity = new_capacity;
     }
     vec->data[vec->size++] = value;
 }

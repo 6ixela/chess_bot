@@ -1,4 +1,6 @@
+#include "piece.h"
 #include "move.h"
+#include "bitBoard.h"
 
 int board64[64] = { 21, 22, 23, 24, 25, 26, 27, 28,
                     31, 32, 33, 34, 35, 36, 37, 38,
@@ -22,7 +24,41 @@ int board120[120] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
                       -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
                       -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
 
-void initMoveStruct(Move *move, u_int from, u_int to)
+static U64* getBitboardPtr(Board *board, int name, int color)
+{
+    if (color == WHITE) {
+        switch (name) {
+            case PAWN: return &board->WPawn;
+            case ROOK: return &board->WRook;
+            case BISHOP: return &board->WBishop;
+            case KNIGHT: return &board->WKnight;
+            case QUEEN: return &board->WQueen;
+            case KING: return &board->WKing;
+            default: return NULL;
+        }
+    } else {
+        switch (name) {
+            case PAWN: return &board->BPawn;
+            case ROOK: return &board->BRook;
+            case BISHOP: return &board->BBishop;
+            case KNIGHT: return &board->BKnight;
+            case QUEEN: return &board->BQueen;
+            case KING: return &board->BKing;
+            default: return NULL;
+        }
+    }
+    return NULL;
+}
+
+static int pos120to64(unsigned int pos120)
+{
+    for (int i = 0; i < 64; i++) {
+        if (board64[i] == pos120) return i;
+    }
+    return -1; // error
+}
+
+void initMoveStruct(Move *move, unsigned int from, unsigned int to)
 {
     Piece piece = {EMPTY, BLACK, 0};
     move->piece_captured = piece;
@@ -30,29 +66,37 @@ void initMoveStruct(Move *move, u_int from, u_int to)
     move->to = to;
 }
 
-static void clearPiece(Piece* piece)
-{
-    piece->name = EMPTY;
-    piece->color = BLACK;
-    piece->value = 0;
-}
-
 void doMovement(Game *game, Move* move)
 {
     Piece piece = game->board[move->from];
-    Piece arrive = game->board[move->to];
+    Piece target = game->board[move->to];
 
-    if (arrive.name != EMPTY && arrive.color != piece.color)
+    if (target.name != EMPTY && target.color != piece.color)
     {
-        move->piece_captured = arrive;
-        clearPiece(&arrive);
+        move->piece_captured = target;
     }
-    
-    game->board[move->from] = arrive;
+
     game->board[move->to] = piece;
+    game->board[move->from] = (Piece){EMPTY, BLACK, 0};
+
+    // Update bitboards
+    int from64 = pos120to64(move->from);
+    int to64 = pos120to64(move->to);
+    if (from64 != -1) {
+        U64 *bb_piece = getBitboardPtr(&game->bitboard, piece.name, piece.color);
+        if (bb_piece) clear_bit(bb_piece, from64);
+    }
+    if (to64 != -1) {
+        U64 *bb_piece = getBitboardPtr(&game->bitboard, piece.name, piece.color);
+        if (bb_piece) set_bit(bb_piece, to64);
+        if (move->piece_captured.name != EMPTY) {
+            U64 *bb_captured = getBitboardPtr(&game->bitboard, move->piece_captured.name, move->piece_captured.color);
+            if (bb_captured) clear_bit(bb_captured, to64);
+        }
+    }
 }
 
-void createMove(Game *game, u_int src, u_int dst, Move *move)
+void createMove(Game *game, unsigned int src, unsigned int dst, Move *move)
 {
     initMoveStruct(move, src, dst);
     Piece pieceSrc = game->board[src];
@@ -61,38 +105,41 @@ void createMove(Game *game, u_int src, u_int dst, Move *move)
     {
         move->moveType = MOVEMENT;
     }
-    else if (pieceDst.name != EMPTY && pieceDst.color == pieceSrc.color)
-    {
-        move->moveType = CASTLE;
-    }
-    else if (pieceDst.name != EMPTY && pieceDst.color != pieceSrc.color)
+    else if (pieceDst.color != pieceSrc.color)
     {
         move->moveType = CAPTURE;
+    }
+    else
+    {
+        move->moveType = MOVEMENT;
     }
 }
 
 void undoMovement(Game *game, Move* move)
 {
-    Piece piece = game->board[move->to];
-    
-    if (move->moveType == CAPTURE || move->moveType == MOVEMENT)
-    {
-        game->board[move->to] = move->piece_captured;
+    Piece movedPiece = game->board[move->to];
+    game->board[move->from] = movedPiece;
+    game->board[move->to] = move->piece_captured;
+
+    // Update bitboards
+    int from64 = pos120to64(move->from);
+    int to64 = pos120to64(move->to);
+    if (to64 != -1) {
+        U64 *bb_piece = getBitboardPtr(&game->bitboard, movedPiece.name, movedPiece.color);
+        if (bb_piece) clear_bit(bb_piece, to64);
     }
-    else if (move->moveType == CASTLE)
-    {
-        game->board[move->to] = game->board[move->from];
+    if (from64 != -1) {
+        U64 *bb_piece = getBitboardPtr(&game->bitboard, movedPiece.name, movedPiece.color);
+        if (bb_piece) set_bit(bb_piece, from64);
     }
-    else
-    {
-        piece.name = PAWN;
-        piece.value = 10;
+    if (move->piece_captured.name != EMPTY && to64 != -1) {
+        U64 *bb_captured = getBitboardPtr(&game->bitboard, move->piece_captured.name, move->piece_captured.color);
+        if (bb_captured) set_bit(bb_captured, to64);
     }
-    game->board[move->from] = piece;
 }
 
 
-Vector *getMoveFromPiece(Game *game, u_int src)
+Vector *getMoveFromPiece(Game *game, unsigned int src)
 {
     switch (game->board[src].name)
     {
@@ -113,12 +160,13 @@ Vector *getMoveFromPiece(Game *game, u_int src)
     }
 }
 
-static char isPushable(const int moveBoard120, Game *game, Piece *pieceFrom)
+static int isPushable(int moveBoard120, const Game *game, const Piece *pieceFrom)
 {
     if (moveBoard120 == -1)
     {
         return 0;
     }
+
     Piece pieceDst = game->board[moveBoard120];
     if (pieceDst.name != EMPTY && pieceFrom->color == pieceDst.color)
     {
@@ -128,19 +176,19 @@ static char isPushable(const int moveBoard120, Game *game, Piece *pieceFrom)
     {
         return 2;
     }
-    
+
     return 1;
 }
 
-Vector* pawnMove(Game *game, u_int src)
+Vector* pawnMove(Game *game, unsigned int src)
 {
-    const char pawnPossibleMove[] = { 10, 20 };
-    const char pawnPossibleAttack[] = { 9, 11 };
+    const int pawnPossibleMove[] = { 10, 20 };
+    const int pawnPossibleAttack[] = { 9, 11 };
     Piece pieceFrom = game->board[src];
     Vector *vector = init_vector(3);
-    const char color = pieceFrom.color == WHITE ? -1 : 1;
-    char moveBoard64 = board64[src] + (pawnPossibleMove[0] * color);
-    char moveBoard120 = board120[moveBoard64];
+    int color = pieceFrom.color == WHITE ? -1 : 1;
+    int moveBoard64 = board64[src] + (pawnPossibleMove[0] * color);
+    int moveBoard120 = board120[moveBoard64];
 
     if (isPushable(moveBoard120, game, &pieceFrom) == 1)
     {
@@ -171,39 +219,26 @@ Vector* pawnMove(Game *game, u_int src)
         }
     }
 
-    for (char i = 0; i < 2; i++)
+    for (int i = 0; i < 2; i++)
     {
-        const char moveBoard64 = board64[src] + (pawnPossibleAttack[i] * color);
-        const char moveBoard120 = board120[moveBoard64];
+        int moveBoard64 = board64[src] + (pawnPossibleAttack[i] * color);
+        int moveBoard120 = board120[moveBoard64];
         if (isPushable(moveBoard120, game, &pieceFrom))
         {
-            // capturing
             if (game->board[moveBoard120].name != EMPTY && pieceFrom.color != game->board[moveBoard120].color)
             {
                 push_back(vector, moveBoard120);
-            }            
-        } 
+            }
+        }
     }
     // TODO en_passant    
     return vector;
 }
 
-static void parseCastling(char castling[], enum COLOR color, Vector *vector)
-{
-    char i = color == WHITE ? 0 : 2;   
-    if (castling[0] == 'K')
-    {
-        /* code */
-    }
-     
-    // +1, +2 vide
-    // -1, -2, -3 vide
-}
-
-Vector* kingMove(Game *game, u_int src)
+Vector* kingMove(Game *game, unsigned int src)
 {
     const size_t LEN_POSSIBLE_MOVE_KING = 8;
-    const char kingPossibleMove[] = { 1, 9, 10, 11, -1, -9, -10, -11 };
+    const int kingPossibleMove[] = { 1, 9, 10, 11, -1, -9, -10, -11 };
     Vector *vector = init_vector(8);
     if (!vector)
     {
@@ -213,21 +248,20 @@ Vector* kingMove(Game *game, u_int src)
 
     for (size_t i = 0; i < LEN_POSSIBLE_MOVE_KING; i++)
     {
-        const char moveBoard64 = board64[src] + kingPossibleMove[i];
-        const char moveBoard120 = board120[moveBoard64];
+        int moveBoard64 = board64[src] + kingPossibleMove[i];
+        int moveBoard120 = board120[moveBoard64];
         if (isPushable(moveBoard120, game, &pieceFrom))
         {
             push_back(vector, moveBoard120);
-        }        
+        }
     }
 
-    parseCastling(game->castling, pieceFrom.color, vector);
     return vector;
 }
 
-Vector* rookMove(Game *game, u_int src)
+Vector* rookMove(Game *game, unsigned int src)
 {
-    const char rookPossibleMove[] = { 1, 10, -1, -10 };
+    const int rookPossibleMove[] = { 1, 10, -1, -10 };
     Vector *vector = init_vector(8);
     if (!vector)
     {
@@ -235,17 +269,17 @@ Vector* rookMove(Game *game, u_int src)
     }
     Piece pieceFrom = game->board[src];
 
-    char i = 1;
-    u_char noMorePossibleMove = 0x0f;
+    int i = 1;
+    unsigned char noMorePossibleMove = 0x0f;
     while (noMorePossibleMove)
     {
-        u_char tmp = 0x01;
+        unsigned char tmp = 0x01;
         for (size_t j = 0; j < 4; j++)
         {
             if (noMorePossibleMove & tmp)
             {
-                const char moveBoard64 = board64[src] + (rookPossibleMove[j] * i);
-                const char moveBoard120 = board120[moveBoard64];
+                int moveBoard64 = board64[src] + (rookPossibleMove[j] * i);
+                int moveBoard120 = board120[moveBoard64];
                 int pieceFront;
                 if (!(pieceFront = isPushable(moveBoard120, game, &pieceFrom)))
                 {
@@ -268,9 +302,9 @@ Vector* rookMove(Game *game, u_int src)
 }
 
 
-Vector* bishopMove(Game *game, u_int src)
+Vector* bishopMove(Game *game, unsigned int src)
 {
-    const char bishopPossibleMove[] = { 9, 11, -9, -11 };
+    const int bishopPossibleMove[] = { 9, 11, -9, -11 };
     Vector *vector = init_vector(8);
     if (!vector)
     {
@@ -278,17 +312,17 @@ Vector* bishopMove(Game *game, u_int src)
     }
     Piece pieceFrom = game->board[src];
 
-    char i = 1;
-    u_char noMorePossibleMove = 0x0f;
+    int i = 1;
+    unsigned char noMorePossibleMove = 0x0f;
     while (noMorePossibleMove)
     {
-        u_char tmp = 0x01;
+        unsigned char tmp = 0x01;
         for (size_t j = 0; j < 4; j++)
         {
             if (noMorePossibleMove & tmp)
             {
-                const char moveBoard64 = board64[src] + (bishopPossibleMove[j] * i);
-                const char moveBoard120 = board120[moveBoard64];
+                int moveBoard64 = board64[src] + (bishopPossibleMove[j] * i);
+                int moveBoard120 = board120[moveBoard64];
                 int pieceFront;
                 if (!(pieceFront = isPushable(moveBoard120, game, &pieceFrom)))
                 {
@@ -309,9 +343,9 @@ Vector* bishopMove(Game *game, u_int src)
     }
     return vector;
 }
-Vector* knightMove(Game *game, u_int src)
+Vector* knightMove(Game *game, unsigned int src)
 {
-    const char knightPossibleMove[] = { 12, 21, 19, 8, -12, -21, -19, -8 };
+    const int knightPossibleMove[] = { 12, 21, 19, 8, -12, -21, -19, -8 };
     const size_t LEN_POSSIBLE_MOVE_KNIGHT = 8;
     Vector *vector = init_vector(8);
     if (!vector)
@@ -322,8 +356,8 @@ Vector* knightMove(Game *game, u_int src)
 
     for (size_t i = 0; i < LEN_POSSIBLE_MOVE_KNIGHT; i++)
     {
-        const char moveBoard64 = board64[src] + knightPossibleMove[i];
-        const char moveBoard120 = board120[moveBoard64];
+        int moveBoard64 = board64[src] + knightPossibleMove[i];
+        int moveBoard120 = board120[moveBoard64];
         if (isPushable(moveBoard120, game, &pieceFrom))
         {
             push_back(vector, moveBoard120);
@@ -331,7 +365,7 @@ Vector* knightMove(Game *game, u_int src)
     }
     return vector;
 }
-Vector* queenMove(Game *game, u_int src)
+Vector* queenMove(Game *game, unsigned int src)
 {
     Vector *vec = concat_vectors(bishopMove(game, src), rookMove(game, src));
     return vec;

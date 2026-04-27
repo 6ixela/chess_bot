@@ -42,10 +42,10 @@ Test(test_white_queen, eval_board) {
 Test(test_white_king, eval_board) {
     Game game;
     char full_fen[] =
-        "k7/8/8/8/8/8/8/8 w KQkq - 0 1";
+        "K7/8/8/8/8/8/8/8 w KQkq - 0 1";
     FEN_to_game(&game, full_fen);
     int eval = evalBoard(&game);
-    cr_assert_eq(eval, 1000, "Expected 1000 but got %d", eval);
+    cr_assert_eq(eval, -10000, "Expected -10000 but got %d", eval);
 }
 
 Test(test_black_rook, eval_board) {
