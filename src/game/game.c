@@ -22,6 +22,179 @@ typedef struct
 } Game;
 */
 
+static inline bool valid_square(int sq64)
+{
+    return sq64 >= 0 && sq64 < BOARD_SIZE * BOARD_SIZE;
+}
+
+static void clearSquareBits(Board *board, int sq64)
+{
+    if (!valid_square(sq64))
+    {
+        return;
+    }
+    U64 mask = ~(1ull << sq64);
+    board->WPawn &= mask;
+    board->BPawn &= mask;
+    board->WKing &= mask;
+    board->BKing &= mask;
+    board->WQueen &= mask;
+    board->BQueen &= mask;
+    board->WRook &= mask;
+    board->BRook &= mask;
+    board->WBishop &= mask;
+    board->BBishop &= mask;
+    board->WKnight &= mask;
+    board->BKnight &= mask;
+}
+
+void clearSquare(Game *game, int sq64)
+{
+    clearSquareBits(&game->bitboard, sq64);
+}
+
+void setPieceOnGame(Game *game, int sq64, Piece piece)
+{
+    if (!valid_square(sq64))
+    {
+        return;
+    }
+
+    clearSquare(game, sq64);
+    if (piece.name == EMPTY)
+    {
+        return;
+    }
+
+    U64 bit = 1ull << sq64;
+    switch (piece.name)
+    {
+    case PAWN:
+        if (piece.color == WHITE)
+        {
+            game->bitboard.WPawn |= bit;
+        }
+        else
+        {
+            game->bitboard.BPawn |= bit;
+        }
+        break;
+    case ROOK:
+        if (piece.color == WHITE)
+        {
+            game->bitboard.WRook |= bit;
+        }
+        else
+        {
+            game->bitboard.BRook |= bit;
+        }
+        break;
+    case BISHOP:
+        if (piece.color == WHITE)
+        {
+            game->bitboard.WBishop |= bit;
+        }
+        else
+        {
+            game->bitboard.BBishop |= bit;
+        }
+        break;
+    case KNIGHT:
+        if (piece.color == WHITE)
+        {
+            game->bitboard.WKnight |= bit;
+        }
+        else
+        {
+            game->bitboard.BKnight |= bit;
+        }
+        break;
+    case QUEEN:
+        if (piece.color == WHITE)
+        {
+            game->bitboard.WQueen |= bit;
+        }
+        else
+        {
+            game->bitboard.BQueen |= bit;
+        }
+        break;
+    case KING:
+        if (piece.color == WHITE)
+        {
+            game->bitboard.WKing |= bit;
+        }
+        else
+        {
+            game->bitboard.BKing |= bit;
+        }
+        break;
+    default:
+        break;
+    }
+}
+
+Piece getPieceFromGame(const Game *game, int sq64)
+{
+    Piece piece = {EMPTY, BLACK, 0};
+    if (!valid_square(sq64))
+    {
+        return piece;
+    }
+
+    U64 mask = 1ull << sq64;
+    if (game->bitboard.WPawn & mask)
+    {
+        return (Piece){PAWN, WHITE, 0};
+    }
+    if (game->bitboard.BPawn & mask)
+    {
+        return (Piece){PAWN, BLACK, 0};
+    }
+    if (game->bitboard.WRook & mask)
+    {
+        return (Piece){ROOK, WHITE, 0};
+    }
+    if (game->bitboard.BRook & mask)
+    {
+        return (Piece){ROOK, BLACK, 0};
+    }
+    if (game->bitboard.WBishop & mask)
+    {
+        return (Piece){BISHOP, WHITE, 0};
+    }
+    if (game->bitboard.BBishop & mask)
+    {
+        return (Piece){BISHOP, BLACK, 0};
+    }
+    if (game->bitboard.WKnight & mask)
+    {
+        return (Piece){KNIGHT, WHITE, 0};
+    }
+    if (game->bitboard.BKnight & mask)
+    {
+        return (Piece){KNIGHT, BLACK, 0};
+    }
+    if (game->bitboard.WQueen & mask)
+    {
+        return (Piece){QUEEN, WHITE, 0};
+    }
+    if (game->bitboard.BQueen & mask)
+    {
+        return (Piece){QUEEN, BLACK, 0};
+    }
+    if (game->bitboard.WKing & mask)
+    {
+        return (Piece){KING, WHITE, 0};
+    }
+    if (game->bitboard.BKing & mask)
+    {
+        return (Piece){KING, BLACK, 0};
+    }
+
+    return piece;
+}
+
 void FEN_to_game(Game *game, const char *fen)
 {
     memset(game, 0, sizeof(Game));
@@ -37,15 +210,13 @@ void FEN_to_game(Game *game, const char *fen)
         else if (fen[i] >= '1' && fen[i] <= '8')
         {
             int empty = fen[i] - '0';
-            for (int k = 0; k < empty; k++)
-            {
-                game->board[pos].name = EMPTY;
-                pos++;
-            }
+            pos += empty;
         }
         else
         {
-            setPiece(&game->board[pos], fen[i]);
+            Piece piece = {EMPTY, BLACK, 0};
+            setPiece(&piece, fen[i]);
+            setPieceOnGame(game, pos, piece);
             pos++;
         }
         i++;
@@ -81,19 +252,10 @@ void FEN_to_game(Game *game, const char *fen)
     i++; // skip space
     // Fullmove number
     game->fullmove_number = atoi(&fen[i]);
-    // Now set bitboard
-    createBoard((char *)fen, &game->bitboard);
 }
 
 bool bothKingsAlive(const Game *game)
 {
-    int kingCount = 0;
-    for (size_t i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
-    {
-        if (game->board[i].name == KING)
-        {
-            kingCount++;
-        }
-    }
-    return kingCount == 2;
+    return __builtin_popcountll(game->bitboard.WKing) == 1 &&
+           __builtin_popcountll(game->bitboard.BKing) == 1;
 }

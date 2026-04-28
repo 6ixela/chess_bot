@@ -19,7 +19,7 @@ int main(void)
 
         int src = -1;
         int dst = -1;
-        alphaBeta(&game, 6, INT_MIN, INT_MAX, game.turn, &src, &dst, 1);
+        alphaBeta(&game, 7, INT_MIN, INT_MAX, game.turn, &src, &dst, 1);
         if (src < 0 || dst < 0)
         {
             break;

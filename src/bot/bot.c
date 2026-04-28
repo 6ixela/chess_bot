@@ -8,22 +8,57 @@
 #include "move.h"
 #include "vector.h"
 
+/*
+static const int CENTER_BONUS[64] = {
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 1, 1, 1, 1, 1, 1, 0,
+    0, 1, 2, 2, 2, 2, 1, 0,
+    0, 1, 2, 3, 3, 2, 1, 0,
+    0, 1, 2, 3, 3, 2, 1, 0,
+    0, 1, 2, 2, 2, 2, 1, 0,
+    0, 1, 1, 1, 1, 1, 1, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+};
+*/
+
+static const int CENTER_BONUS[64] = {
+    1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1,
+};
+
+static int scorePieceBitboard(U64 bitboard, int base)
+{
+    int score = 0;
+    while (bitboard)
+    {
+        int sq = __builtin_ctzll(bitboard);
+        score += base + CENTER_BONUS[sq];
+        bitboard &= bitboard - 1;
+    }
+    return score;
+}
+
 int evalBoard(const Game *game)
 {
     int res = 0;
-    // White pieces
-    res += __builtin_popcountll(game->bitboard.WPawn) * 10;
-    res += __builtin_popcountll(game->bitboard.WKnight) * 30;
-    res += __builtin_popcountll(game->bitboard.WBishop) * 30;
-    res += __builtin_popcountll(game->bitboard.WRook) * 50;
-    res += __builtin_popcountll(game->bitboard.WQueen) * 200;
+    res += scorePieceBitboard(game->bitboard.WPawn, 10);
+    res += scorePieceBitboard(game->bitboard.WKnight, 30);
+    res += scorePieceBitboard(game->bitboard.WBishop, 30);
+    res += scorePieceBitboard(game->bitboard.WRook, 50);
+    res += scorePieceBitboard(game->bitboard.WQueen, 200);
     res += __builtin_popcountll(game->bitboard.WKing) * 10000;
-    // Black pieces (negative)
-    res -= __builtin_popcountll(game->bitboard.BPawn) * 10;
-    res -= __builtin_popcountll(game->bitboard.BKnight) * 30;
-    res -= __builtin_popcountll(game->bitboard.BBishop) * 30;
-    res -= __builtin_popcountll(game->bitboard.BRook) * 50;
-    res -= __builtin_popcountll(game->bitboard.BQueen) * 200;
+
+    res -= scorePieceBitboard(game->bitboard.BPawn, 10);
+    res -= scorePieceBitboard(game->bitboard.BKnight, 30);
+    res -= scorePieceBitboard(game->bitboard.BBishop, 30);
+    res -= scorePieceBitboard(game->bitboard.BRook, 50);
+    res -= scorePieceBitboard(game->bitboard.BQueen, 200);
     res -= __builtin_popcountll(game->bitboard.BKing) * 10000;
     return res;
 }
@@ -46,7 +81,7 @@ int alphaBeta(Game *game, int depth, int alpha, int beta,
         for (size_t j = 0; j < BOARD_SIZE && !cutoff; j++)
         {
             int src = i * 8 + j;
-            Piece piece = game->board[src];
+            Piece piece = getPieceFromGame(game, src);
             if (piece.name == EMPTY || piece.color != isWhite)
                 continue;
 

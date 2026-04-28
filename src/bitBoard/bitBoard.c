@@ -84,7 +84,7 @@ err createBoard(char *fen, Board *board)
     char check = 0;
     bool wasNumber = 0;
     int count = 0;
-    for (size_t i = 0; fen[i] != 0; i++)
+    for (size_t i = 0; fen[i] != 0 && fen[i] != ' '; i++)
     {
         char c = fen[i];
         if (c == '/')
