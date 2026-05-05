@@ -1,74 +1,36 @@
-/*
-char *recupPiece(struct piece *p);
-
-void printMove(struct piece *p)
-{
-    for (size_t i = 0; (int)i < p->nbMoves; i++)
-    {
-        printf("move %ld = %i\n", i, p->possibleMoves[i]);
-    }
-}
-
-void print_chess(struct piece **tab)
-{
-    printf("_________________\n");
-    for(size_t i = 0; i < 8; i++)
-    {
-        printf("|");
-        for (size_t j = 0; j < 8; j++)
-        {
-            char *p = recupPiece(tab[i * 8 + j]);
-            if (tab[i * 8 + j] != NULL && !tab[i * 8 + j]->isWhite)
-            {
-                printf("\033[0;32m");
-                printf("%s", p);
-                printf("\033[0m");
-                printf("|");
-            }
-            else
-                printf("%s|", p);
-        }
-        printf("\n");
-    }
-    printf("_________________\n");
-}
-
-char *recupPiece(struct piece *p)
-{
-    char *res = " ";
-    if(p == NULL)
-        res = " ";
-    else
-    {
-        if(p->name == 'p')
-            res = "♙";
-        else if (p->name == 'n')
-            res = "♘";
-        else if (p->name == 'b')
-            res = "♗";
-        else if (p->name == 'r')
-            res = "♖";
-        else if (p->name == 'q')
-            res = "♕";
-        else if(p->name == 'k')
-            res = "♔";
-    }
-    return res;
-}
-
-//rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR
-*/
-
-#include "board.h"
-
+#include <limits.h>
+#include <stdbool.h>
 #include <stdio.h>
 
-int main()
+#include "bot.h"
+#include "display.h"
+#include "game.h"
+#include "move.h"
+
+int main(void)
 {
-    printf("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR\n");
-    struct board *b = fenToBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
-    printf("%s\n", boardToFen(b));
-    freeBoard(b);
-    printf("Hello\n");
+    Game game;
+    FEN_to_game(&game,
+               "r4rk1/ppq2Np1/1n1pb3/2p4p/8/3B2Q1/PPPB2PP/5R1K b KQkq - 0 1");
+    game.turn = WHITE;
+    while (bothKingsAlive(&game))
+    {
+        displayMove(&game, NULL, UINT_MAX);
+
+        int src = -1;
+        int dst = -1;
+        alphaBeta(&game, 7, INT_MIN, INT_MAX, game.turn, &src, &dst, 1);
+        if (src < 0 || dst < 0)
+        {
+            break;
+        }
+
+        Move move;
+        createMove(&game, src, dst, &move);
+        doMovement(&game, &move);
+        game.turn = (game.turn == WHITE) ? BLACK : WHITE;
+    }
+    displayMove(&game, NULL, 4);
+    
     return 0;
 }

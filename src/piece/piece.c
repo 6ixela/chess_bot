@@ -6,17 +6,16 @@
 static int checkName(char name)
 {
     char n = tolower(name);
-    if (n == 'p' || n == 'r' || n == 'n' || n == 'b' ||
-        n == 'q' || n == 'k')
+    if (n == 'p' || n == 'r' || n == 'n' || n == 'b' || n == 'q' || n == 'k')
     {
         return 1;
     }
     return 0;
 }
 
-void determinePiece(char name, struct piece* piece)
+static void determinePiece(Piece *piece, char namePiece)
 {
-    char n = tolower(name);
+    char n = tolower(namePiece);
     switch (n)
     {
     case 'p':
@@ -46,20 +45,15 @@ void determinePiece(char name, struct piece* piece)
     }
 }
 
-struct piece* createPiece(char name)
+int setPiece(Piece *piece, char namePiece)
 {
-    if (!checkName(name))
-    {
-        return NULL;
-    }
-    
-    struct piece* piece = malloc(sizeof(struct piece));
-    piece->color = isupper(name) ? 1 : 0;
-    determinePiece(name, piece);
-    return piece;
-}
 
-void freePiece(struct piece* piece)
-{
-    free(piece);
+    if (!checkName(namePiece))
+    {
+        return 0;
+    }
+
+    piece->color = isupper(namePiece) ? WHITE : BLACK;
+    determinePiece(piece, namePiece);
+    return 1;
 }
