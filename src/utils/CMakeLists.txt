@@ -2,7 +2,9 @@ set(SOURCES
     vector.c
     vector.h
     display.c
-    display.h)
+    display.h
+    input.c
+    input.h)
 
 add_library(utils ${SOURCES})
 

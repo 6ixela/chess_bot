@@ -54,3 +54,30 @@ dkms.conf
 build
 _build
 .clang-format
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.cproject
+.settings/
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+.cache/
+
+# OS specific
+Thumbs.db
+*.orig
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/

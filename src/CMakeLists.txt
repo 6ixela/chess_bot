@@ -11,4 +11,4 @@ add_executable(${PROJECT_NAME} main.c)
 # target_compile_options(${PROJECT_NAME} PUBLIC --coverage)
 
 # Lier les bibliothèques
-target_link_libraries(${PROJECT_NAME} PRIVATE game piece bot move utils bitBoard)
+target_link_libraries(${PROJECT_NAME} PRIVATE game_manager game piece bot move utils bitBoard)
